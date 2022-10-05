@@ -1,0 +1,42 @@
+parameters:
+  - name: ws_api_key
+    type: string
+  - name: ws_user_key
+    type: string
+  - name: ws_url
+    type: string
+  - name: ws_product_token
+    type: string
+  - name: ws_project_token
+    type: string
+  - name: ws_scan_folder
+    type: string
+  - name: ws_scan_file
+    type: string
+
+steps:
+  - script: |
+      curl -LJO https://unified-agent.s3.amazonaws.com/wss-unified-agent.jar
+    displayName: Downloading SCA Agent
+
+  - script: |
+      echo 'contents of scan_folder:'
+      ls ${{ parameters.ws_scan_folder }}
+      echo 'scan_file exists:'
+      ls ${{ parameters.ws_scan_file }}
+      
+      java -jar wss-unified-agent.jar -appPath ${{ parameters.ws_scan_file }} -d ${{ parameters.ws_scan_folder }}
+    env:
+      WS_PRODUCTTOKEN: ${{ parameters.ws_product_token }}
+      WS_PROJECTTOKEN:  ${{ parameters.ws_project_token }}
+      WS_APIKEY: ${{ parameters.ws_api_key }}
+      WS_USERKEY: ${{ parameters.ws_user_key }}
+      WS_ENABLEIMPACTANALYSIS: true
+      WS_RESOLVEALLDEPENDENCIES: false
+      WS_NUGET_RESOLVEDEPENDENCIES: true
+      WS_NUGET_RUNPRESTEP: true
+      WS_FILESYSTEMSCAN: false
+      WS_GENERATEPROJECTDETAILSJSON: true
+      WS_EXCLUDES: '**/build/** **/tests/**'
+    displayName: Performing SCA scan
+
